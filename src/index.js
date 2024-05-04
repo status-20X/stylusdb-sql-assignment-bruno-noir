@@ -1,38 +1,17 @@
 const parseQuery = require('./queryParser');
 const readCSV = require('./csvReader');
+// tests/index.test.js
 
-// async function executeSELECTQuery(query) {
-//     const { fields, table } = parseQuery(query);
-//     const data = await readCSV(`${table}.csv`);
+const executeSELECTQuery = require('../src/index');
 
-//     // Filter the fields based on the query
-//     return data.map(row => {
-//         const filteredRow = {};
-//         fields.forEach(field => {
-//             filteredRow[field] = row[field];
-//         });
-//         return filteredRow;
-//     });
-// }
-async function executeSELECTQuery(query) {
-    const { fields, table, whereClause } = parseQuery(query);
-    const data = await readCSV(`${table}.csv`);
+test('Execute SQL Query', async () => {
+    const query = 'SELECT id, name FROM sample';
+    const result = await executeSELECTQuery(query);
+    expect(result.length).toBeGreaterThan(0);
+    expect(result[0]).toHaveProperty('id');
+    expect(result[0]).toHaveProperty('name');
+    expect(result[0]).not.toHaveProperty('age');
+    expect(result[0]).toEqual({ id: '1', name: 'John' });
+});
 
-    // Filtering based on WHERE clause
-    const filteredData = whereClause
-        ? data.filter(row => {
-            const [field, value] = whereClause.split('=').map(s => s.trim());
-            return row[field] === value;
-        })
-        : data;
-
-    // Selecting the specified fields
-    return filteredData.map(row => {
-        const selectedRow = {};
-        fields.forEach(field => {
-            selectedRow[field] = row[field];
-        });
-        return selectedRow;
-    });
-}
-module.exports = executeSELECTQuery; 
+module.exports = executeSELECTQuery;
